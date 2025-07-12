@@ -1,0 +1,57 @@
+<!-- pharmacy_stock_system/templates/edit_medication.html -->
+{% extends "layout.html" %}
+
+{% block title %}Edit Medication{% endblock %}
+
+{% block content %}
+<header>
+    <h1>Edit: {{ medication['name'] }}</h1>
+    <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to Inventory</a>
+</header>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="flash-messages">
+        {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<form method="post" class="card">
+    <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" name="name" id="name" value="{{ request.form.get('name', medication['name']) }}" required>
+    </div>
+    <div class="form-group">
+        <label for="category">Category</label>
+        <input type="text" name="category" id="category" value="{{ request.form.get('category', medication['category']) }}">
+    </div>
+    <div class="form-group">
+        <label for="manufacturer">Manufacturer</label>
+        <input type="text" name="manufacturer" id="manufacturer" value="{{ request.form.get('manufacturer', medication['manufacturer']) }}">
+    </div>
+    <div class="form-group">
+        <label for="batch_number">Batch Number</label>
+        <input type="text" name="batch_number" id="batch_number" value="{{ request.form.get('batch_number', medication['batch_number']) }}">
+    </div>
+    <div class="form-group">
+        <label for="expiry_date">Expiry Date</label>
+        <input type="date" name="expiry_date" id="expiry_date" value="{{ request.form.get('expiry_date', medication['expiry_date']) }}" required>
+    </div>
+    <div class="form-group">
+        <label for="quantity">Quantity</label>
+        <input type="number" name="quantity" id="quantity" value="{{ medication['quantity'] }}" disabled>
+        <small>To change quantity, please use the "Adjust Stock" page.</small>
+    </div>
+    <div class="form-group">
+        <label for="price">Price (per unit)</label>
+        <input type="text" name="price" id="price" value="{{ request.form.get('price', medication['price']) }}">
+    </div>
+    
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </div>
+</form>
+{% endblock %}

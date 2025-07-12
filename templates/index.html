@@ -1,0 +1,240 @@
+<!-- pharmacy_stock_system/templates/index.html -->
+<!-- This file is heavily updated with the new dashboard and pagination -->
+{% extends "layout.html" %}
+
+{% block title %}Dashboard - Medication Stock{% endblock %}
+
+{% block content %}
+<header>
+    <h1>Dashboard</h1>
+    <div class="header-actions">
+        <span class="welcome-user">Welcome, {{ session.username }}! ({{ session.user_role | capitalize }})</span>
+        {% if session.user_role == 'admin' %}
+            <a href="{{ url_for('audit_log') }}" class="btn btn-secondary">Audit Log</a> <!-- NEW BUTTON -->
+            <a href="{{ url_for('users') }}" class="btn btn-warning">User Management</a>
+            <a href="{{ url_for('add') }}" class="btn btn-primary">Add Medication</a>
+        {% endif %}
+        <a href="{{ url_for('dispense') }}" class="btn btn-success">Dispense Prescription</a>
+        <a href="{{ url_for('reports') }}" class="btn btn-info">Reports</a>
+        <a href="{{ url_for('logout') }}" class="btn btn-secondary">Logout</a>
+    </div>
+</header>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="flash-messages">
+        {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<!-- NEW: Dashboard Charts Section -->
+<div class="dashboard-grid">
+    <div class="chart-container card">
+        <h3>Top 5 Stocked Medications</h3>
+        <canvas id="topMedsChart"></canvas>
+    </div>
+    <div class="chart-container card">
+        <h3>Medications by Category</h3>
+        <canvas id="categoryChart"></canvas>
+    </div>
+</div>
+
+<!-- Alerts Section -->
+{% if not search_query %}
+<div class="alerts-container">
+    {% if low_stock_alerts %}
+    <div class="alert-card low-stock">
+        <h2>Low Stock Alerts (<= {{ low_stock_threshold }} units)</h2>
+        <ul>
+            {% for med in low_stock_alerts %}
+            <li><strong>{{ med['name'] }}</strong> is low on stock ({{ med['quantity'] }} remaining).</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    {% if expiry_alerts %}
+    <div class="alert-card near-expiry">
+        <h2>Expiry Alerts (in next {{ expiry_alert_days }} days)</h2>
+        <ul>
+            {% for med in expiry_alerts %}
+            <li><strong>{{ med['name'] }}</strong> (Batch: {{ med['batch_number'] }}) will expire on {{ med['expiry_date'] }}.</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- Inventory Section -->
+<div class="card">
+    <div class="inventory-header">
+        <h2>Medication Inventory</h2>
+        <div class="search-container">
+            <form method="get" action="{{ url_for('index') }}">
+                <div class="search-form-group">
+                    <input type="search" name="q" placeholder="Search by Name, Category, or Batch..." value="{{ search_query or '' }}">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                    {% if search_query %}
+                        <a href="{{ url_for('index') }}" class="btn btn-secondary">Clear</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Quantity</th>
+                    <th>Expiry Date</th>
+                    <th>Batch No.</th>
+                    {% if session.user_role == 'admin' %}
+                    <th>Actions</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for med in medications %}
+                <tr class="{% if med['quantity'] <= low_stock_threshold %}row-warning{% endif %}">
+                    <td data-label="Name">{{ med['name'] }}</td>
+                    <td data-label="Category">{{ med['category'] }}</td>
+                    <td data-label="Quantity"><b>{{ med['quantity'] }}</b></td>
+                    <td data-label="Expiry Date">{{ med['expiry_date'] }}</td>
+                    <td data-label="Batch No.">{{ med['batch_number'] }}</td>
+                    {% if session.user_role == 'admin' %}
+                    <td data-label="Actions" class="actions">
+                        <a href="{{ url_for('stock', med_id=med['id']) }}" class="btn btn-info">Adjust Stock</a>
+                        <a href="{{ url_for('edit', med_id=med['id']) }}" class="btn btn-secondary">Edit</a>
+                        <form action="{{ url_for('delete', med_id=med['id']) }}" method="post" onsubmit="return confirm('Are you sure you want to delete this item? This is irreversible.');">
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="{% if session.user_role == 'admin' %}6{% else %}5{% endif %}" class="no-data">
+                        {% if search_query %}
+                            No medications found for "{{ search_query }}".
+                        {% else %}
+                            No medications found. Add one to get started!
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- NEW: Pagination Controls -->
+    {% if total_pages > 1 %}
+    <nav class="pagination">
+        <ul>
+            <!-- Previous Page Link -->
+            <li class="page-item {% if current_page <= 1 %}disabled{% endif %}">
+                <a class="page-link" href="{{ url_for('index', page=current_page - 1, q=search_query) }}">&laquo;</a>
+            </li>
+            <!-- Page Number Links -->
+            {% for p in range(1, total_pages + 1) %}
+            <li class="page-item {% if p == current_page %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('index', page=p, q=search_query) }}">{{ p }}</a>
+            </li>
+            {% endfor %}
+            <!-- Next Page Link -->
+            <li class="page-item {% if current_page >= total_pages %}disabled{% endif %}">
+                <a class="page-link" href="{{ url_for('index', page=current_page + 1, q=search_query) }}">&raquo;</a>
+            </li>
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// This script renders the charts using data passed from Flask
+document.addEventListener('DOMContentLoaded', function() {
+    const darkMode = document.body.classList.contains('dark-mode');
+    const textColor = darkMode ? 'rgba(229, 231, 235, 0.9)' : 'rgba(55, 65, 81, 0.9)';
+    const gridColor = darkMode ? 'rgba(55, 65, 81, 0.3)' : 'rgba(209, 213, 219, 0.3)';
+
+    // Data passed from Flask template
+    const topMedsData = JSON.parse('{{ top_meds_chart | safe }}');
+    const categoryData = JSON.parse('{{ category_chart | safe }}');
+
+    // Top 5 Stocked Medications Chart (Bar)
+    if (document.getElementById('topMedsChart') && topMedsData.labels.length > 0) {
+        new Chart(document.getElementById('topMedsChart'), {
+            type: 'bar',
+            data: {
+                labels: topMedsData.labels,
+                datasets: [{
+                    label: 'Quantity in Stock',
+                    data: topMedsData.data,
+                    backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        ticks: { color: textColor },
+                        grid: { color: gridColor }
+                    },
+                    x: {
+                        ticks: { color: textColor },
+                        grid: { color: gridColor }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    }
+
+    // Medications by Category Chart (Pie)
+    if (document.getElementById('categoryChart') && categoryData.labels.length > 0) {
+        new Chart(document.getElementById('categoryChart'), {
+            type: 'pie',
+            data: {
+                labels: categoryData.labels,
+                datasets: [{
+                    label: 'Count',
+                    data: categoryData.data,
+                    backgroundColor: [
+                        'rgba(239, 68, 68, 0.5)', 'rgba(245, 158, 11, 0.5)', 'rgba(34, 197, 94, 0.5)',
+                        'rgba(59, 130, 246, 0.5)', 'rgba(139, 92, 246, 0.5)', 'rgba(236, 72, 153, 0.5)'
+                    ],
+                    borderColor: [
+                        'rgba(239, 68, 68, 1)', 'rgba(245, 158, 11, 1)', 'rgba(34, 197, 94, 1)',
+                        'rgba(59, 130, 246, 1)', 'rgba(139, 92, 246, 1)', 'rgba(236, 72, 153, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { color: textColor }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,21 @@
+# .gitignore
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Database
+*.db
+*.db-journal
+
+# Environment
+.env
+venv/
+.venv
+env/
+
+# IDE / Editor specific
+.idea/
+.vscode/

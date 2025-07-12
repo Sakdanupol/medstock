@@ -1,0 +1,273 @@
+/* pharmacy_stock_system/static/style.css – streamlined for clarity and consistency */
+
+/* -------------------------------------------------------------------------
+   THEME TOKENS
+   ------------------------------------------------------------------------- */
+:root {
+  /* Brand palette */
+  --primary-color:  #3b82f6;
+  --secondary-color:#6b7280;
+  --success-color:  #22c55e;   /* reserved for irreversible / critical actions */
+  --danger-color:   #ef4444;
+  --warning-color:  #f59e0b;
+  --info-color:     #0ea5e9;   /* legacy – mostly unused after CTA unification */
+
+  /* Surfaces & text */
+  --bg-color:          #f9fafb;
+  --card-bg-color:     #ffffff;
+  --text-color:        #1f2937;
+  --text-muted-color:  #6b7280;
+  --border-color:      #e5e7eb;
+  --table-header-bg:   #f3f4f6;
+  --table-row-hover:   #f9fafb;
+
+  /* Effects */
+  --radius:  8px;
+  --shadow:  0 2px 6px rgba(0,0,0,.05);
+
+  /* Typography */
+  --font-family: 'Inter', sans-serif;
+
+  /* Charts */
+  --chart-gridline: rgba(255,255,255,.04); /* used by JS config */
+}
+
+body.dark-mode {
+  --primary-color:  #3b82f6;              /* same brand blue for both modes */
+  --secondary-color:#9ca3af;
+  --bg-color:          #111827;
+  --card-bg-color:     #1f2937;
+  --text-color:        #e5e7eb;
+  --text-muted-color:  #9ca3af;
+  --border-color:      #374151;
+  --table-header-bg:   #1f2937;
+  --table-row-hover:   #1f2937;
+  --shadow:            0 2px 6px rgba(0,0,0,.6);
+  --chart-gridline:    rgba(255,255,255,.06);
+}
+
+/* -------------------------------------------------------------------------
+   GLOBAL RESETS
+   ------------------------------------------------------------------------- */
+*{box-sizing:border-box; margin:0; padding:0;}
+html,body{height:100%;}
+
+body{
+  font-family:var(--font-family);
+  background:var(--bg-color);
+  color:var(--text-color);
+  line-height:1.5;
+  padding:20px;
+  transition:background .3s,color .3s;
+}
+
+.container{max-width:1200px;margin:0 auto;padding:20px;}
+
+/* -------------------------------------------------------------------------
+   LAYOUT HELPERS
+   ------------------------------------------------------------------------- */
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:.75rem;                 /* tighter, but consistent, breathing room */
+  padding-block:.5rem;        /* vertical space for toolbar */
+  margin-bottom:2rem;
+}
+.header-actions{display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;}
+.welcome-user{font-weight:600;color:var(--text-muted-color);}
+
+/* -------------------------------------------------------------------------
+   BUTTONS – CTA palette now unified around primary blue
+   ------------------------------------------------------------------------- */
+.btn{
+  display:inline-block;
+  padding:.55rem 1.2rem;
+  border:none;
+  border-radius:var(--radius);
+  font-weight:600;
+  color:#fff;
+  text-align:center;
+  white-space:nowrap;
+  cursor:pointer;
+  transition:transform .15s ease,filter .15s ease;
+}
+.btn:hover{transform:translateY(-2px);filter:brightness(.9);}   /* universal hover */
+
+/* Primary / default actions – used for most CTAs */
+.btn-primary  {background:var(--primary-color);}   .btn-primary:hover  {filter:brightness(.93);}
+
+/* Neutral / secondary actions (e.g., navigation tabs) */
+.btn-secondary{background:var(--secondary-color);} .btn-secondary:hover{filter:brightness(.93);}
+
+/* Success & Danger kept for very specific, irreversible flows (e.g., Dispense Prescription) */
+.btn-success  {background:var(--success-color);}    .btn-success:hover  {filter:brightness(.93);}  
+.btn-danger   {background:var(--danger-color);}     .btn-danger:hover   {filter:brightness(.93);}  
+
+/* Info now inherits primary palette to avoid rainbow overload */
+.btn-info     {background:var(--primary-color);}    .btn-info:hover     {filter:brightness(.93);}  
+
+/* Warning toned down: subtle yellow background, dark text */
+.btn-warning  {
+  background:color-mix(in srgb, var(--warning-color) 70%, #fff);
+  color:#111827;
+}
+.btn-warning:hover{filter:brightness(.95);}  
+
+/* Compact action buttons inside tables (Adjust Stock / Edit / Delete) */
+.table-container .btn{
+  padding:.35rem .75rem;
+  font-size:.75rem;
+}
+
+/* -------------------------------------------------------------------------
+   SEARCH BAR
+   ------------------------------------------------------------------------- */
+.search-container{margin-bottom:2rem;}
+.search-form-group{display:flex;gap:1rem;flex-wrap:wrap;}
+.search-form-group input[type="search"]{
+  flex:1;
+  padding:12px;
+  border:1px solid var(--border-color);
+  border-radius:var(--radius);
+  background:var(--card-bg-color);
+  color:var(--text-color);
+}
+.search-form-group input[type="search"]:focus{
+  border-color:var(--primary-color);
+  box-shadow:0 0 0 3px color-mix(in srgb, var(--primary-color) 25%, transparent);
+  outline:none;
+}
+
+/* -------------------------------------------------------------------------
+   CARDS
+   ------------------------------------------------------------------------- */
+.card{
+  background:var(--card-bg-color);
+  padding:2rem;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  border:1px solid var(--border-color);
+}
+
+/* -------------------------------------------------------------------------
+   TABLES
+   ------------------------------------------------------------------------- */
+.table-container{
+  background:var(--card-bg-color);
+  border:1px solid var(--border-color);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  overflow-x:auto;
+}
+
+table{width:100%;border-collapse:collapse;}
+th,td{padding:15px;text-align:left;border-bottom:1px solid var(--border-color);}
+thead th{background:var(--table-header-bg);color:var(--text-muted-color);font-size:.85em;text-transform:uppercase;}
+/* darker hover tint for better visibility in dark‑mode */
+tbody tr:hover{background:color-mix(in srgb, var(--primary-color) 10%, var(--card-bg-color));} 
+.row-warning{background:color-mix(in srgb, var(--warning-color) 20%, var(--card-bg-color));}
+.no-data{text-align:center;padding:40px;color:var(--text-muted-color);}
+
+/* Responsive table (mobile first) */
+@media(max-width:768px){
+  table thead{display:none;}
+  table tr{display:block;margin-bottom:1rem;border:1px solid var(--border-color);border-radius:var(--radius);box-shadow:var(--shadow);} 
+  table td{display:block;text-align:right;border-bottom:1px dotted var(--border-color);position:relative;padding-left:50%;}
+  table td:before{content:attr(data-label);position:absolute;left:15px;font-weight:600;text-align:left;}
+  table td:last-child{border-bottom:0;}
+}
+
+/* -------------------------------------------------------------------------
+   ALERTS
+   ------------------------------------------------------------------------- */
+.alerts-container{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2rem;}
+.alert-card{
+  padding:1.5rem;
+  border-radius:var(--radius);
+  border-left:5px solid var(--border-color);
+  color:var(--text-color);
+  background:var(--card-bg-color);
+}
+.alert-card.low-stock{background:color-mix(in srgb, var(--warning-color) 20%, var(--card-bg-color));border-left-color:var(--warning-color);} 
+.alert-card.near-expiry{background:color-mix(in srgb, var(--danger-color) 20%, var(--card-bg-color));border-left-color:var(--danger-color);} 
+
+/* --- Alerts and Flash Messages --- */
+.flash-messages { margin-bottom: 1rem; }
+.flash { padding: 1rem; border-radius: var(--border-radius); color: white; margin-bottom: 1rem; }
+.flash.success { background-color: var(--success-color); }
+.flash.error { background-color: var(--danger-color); }
+.flash.info { background-color: var(--info-color); }
+
+.alerts-container { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+.alert-card {
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    color: var(--text-color);
+}
+.alert-card h2 { border-bottom: 1px solid color-mix(in srgb, var(--text-color) 50%, transparent); margin-top: 0; font-size: 1.2rem; padding-bottom: 0.5rem; margin-bottom: 1rem; }
+.alert-card ul { margin: 0; padding-left: 20px; }
+.alert-card.low-stock { background-color: color-mix(in srgb, var(--warning-color) 20%, var(--card-bg-color)); border-left: 5px solid var(--warning-color); }
+/* UPDATED STYLE for more prominent red */
+.alert-card.near-expiry { 
+    background-color: color-mix(in srgb, var(--danger-color) 30%, var(--card-bg-color)); 
+    border-left: 5px solid var(--danger-color); 
+}
+
+
+/* -------------------------------------------------------------------------
+   FORM ELEMENTS
+   ------------------------------------------------------------------------- */
+.form-group{margin-bottom:1.5rem;}
+.form-group label{display:block;margin-bottom:.5rem;font-weight:600;color:var(--text-color);} 
+.form-group input, select{
+  width:100%;
+  padding:12px;
+  border:1px solid var(--border-color);
+  border-radius:var(--radius);
+  background:var(--bg-color);
+  color:var(--text-color);
+}
+.form-group input:focus, select:focus{
+  border-color:var(--primary-color);
+  box-shadow:0 0 0 3px color-mix(in srgb, var(--primary-color) 25%, transparent);
+  outline:none;
+}
+.form-actions{text-align:right;margin-top:1.5rem;}
+
+/* -------------------------------------------------------------------------
+   DASHBOARD GRID & CHARTS
+   ------------------------------------------------------------------------- */
+.dashboard-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:2rem;margin-bottom:2rem;}
+.chart-container{height:350px;padding:2rem;}
+
+/* -------------------------------------------------------------------------
+   DISPENSE & STOCK MOVEMENTS
+   ------------------------------------------------------------------------- */
+.dispense-grid, .stock-form-container{display:grid;grid-template-columns:1fr 1.5fr;gap:2rem;}
+
+/* -------------------------------------------------------------------------
+   USER MANAGEMENT GRID
+   ------------------------------------------------------------------------- */
+.add-user-grid{display:grid;grid-template-columns:2fr 2fr 1fr 1fr;gap:1.5rem;align-items:flex-end;}
+/* Responsive adjustments */
+@media(max-width:992px){
+  .alerts-container, .stock-form-container, .dispense-grid, .add-user-grid{grid-template-columns:1fr;}
+}
+
+/* -------------------------------------------------------------------------
+   THEME TOGGLE FAB
+   ------------------------------------------------------------------------- */
+#theme-toggle{
+  position:fixed;
+  bottom:20px;right:20px;
+  width:50px;height:50px;
+  border:none;border-radius:50%;
+  background:var(--card-bg-color);
+  color:var(--text-color);
+  box-shadow:var(--shadow);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
+.toggle-icon{width:24px;height:24px;}
+#theme-toggle-light-icon{display:none;}

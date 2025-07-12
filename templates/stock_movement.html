@@ -1,0 +1,80 @@
+<!-- pharmacy_stock_system/templates/stock_movement.html -->
+{% extends "layout.html" %}
+
+{% block title %}Adjust Stock - {{ medication['name'] }}{% endblock %}
+
+{% block content %}
+<header>
+    <h1>Adjust Stock</h1>
+    <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to Inventory</a>
+</header>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="flash-messages">
+        {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<div class="stock-form-container">
+    <div class="card medication-summary">
+        <h2>{{ medication['name'] }}</h2>
+        <p><strong>Current Stock:</strong> <span class="current-stock">{{ medication['quantity'] }}</span> units</p>
+        <p><strong>Category:</strong> {{ medication['category'] }}</p>
+        <p><strong>Expiry:</strong> {{ medication['expiry_date'] }}</p>
+    </div>
+
+    <form method="post" class="card">
+        <h3>New Stock Movement</h3>
+        <div class="form-group">
+            <label>Type</label>
+            <div class="radio-group">
+                <label><input type="radio" name="type" value="in" checked> Stock In (Add)</label>
+                <label><input type="radio" name="type" value="out"> Stock Out (Remove)</label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="quantity">Quantity</label>
+            <input type="number" name="quantity" id="quantity" min="1" required>
+        </div>
+        <div class="form-group">
+            <label for="note">Note / Reason</label>
+            <input type="text" name="note" id="note" placeholder="e.g., Dispensed to patient, New delivery">
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Update Stock</button>
+        </div>
+    </form>
+</div>
+
+<div class="history-container card">
+    <h2>Stock Movement History</h2>
+    {% if history %}
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Quantity</th>
+                <th>Note</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for move in history %}
+            <tr class="{% if move['type'] == 'in' %}movement-in{% else %}movement-out{% endif %}">
+                <td>{{ move['date'] }}</td>
+                <td>{{ move['type'] | upper }}</td>
+                <td>{{ move['quantity'] }}</td>
+                <td>{{ move['note'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="no-data">No stock movement history for this item.</p>
+    {% endif %}
+</div>
+{% endblock %}

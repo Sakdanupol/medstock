@@ -1,0 +1,56 @@
+<!-- pharmacy_stock_system/templates/add_medication.html -->
+{% extends "layout.html" %}
+
+{% block title %}Add Medication{% endblock %}
+
+{% block content %}
+<header>
+    <h1>Add New Medication</h1>
+    <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to Inventory</a>
+</header>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="flash-messages">
+        {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<form method="post" class="card">
+    <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" name="name" id="name" placeholder="e.g., Paracetamol 500mg" value="{{ form_data.get('name', '') }}" required>
+    </div>
+    <div class="form-group">
+        <label for="category">Category</label>
+        <input type="text" name="category" id="category" placeholder="e.g., Analgesic" value="{{ form_data.get('category', '') }}">
+    </div>
+    <div class="form-group">
+        <label for="manufacturer">Manufacturer</label>
+        <input type="text" name="manufacturer" id="manufacturer" placeholder="e.g., Pharma Inc." value="{{ form_data.get('manufacturer', '') }}">
+    </div>
+    <div class="form-group">
+        <label for="batch_number">Batch Number</label>
+        <input type="text" name="batch_number" id="batch_number" placeholder="e.g., BATCH12345" value="{{ form_data.get('batch_number', '') }}">
+    </div>
+    <div class="form-group">
+        <label for="expiry_date">Expiry Date</label>
+        <input type="date" name="expiry_date" id="expiry_date" value="{{ form_data.get('expiry_date', '') }}" required>
+    </div>
+    <div class="form-group">
+        <label for="quantity">Quantity</label>
+        <input type="number" name="quantity" id="quantity" min="0" placeholder="e.g., 100" value="{{ form_data.get('quantity', '') }}" required>
+    </div>
+    <div class="form-group">
+        <label for="price">Price (per unit)</label>
+        <input type="text" name="price" id="price" placeholder="e.g., 10.50" value="{{ form_data.get('price', '') }}">
+    </div>
+    
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Add Medication</button>
+    </div>
+</form>
+{% endblock %}

@@ -1,0 +1,27 @@
+<!-- pharmacy_stock_system/templates/reports.html -->
+{% extends "layout.html" %}
+
+{% block title %}Generate Reports{% endblock %}
+
+{% block content %}
+<header>
+    <h1>Generate Reports</h1>
+    <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to Inventory</a>
+</header>
+
+<div class="card">
+    <h2>Available Reports</h2>
+    <p>Select a report to download it.</p>
+    <ul class="report-list">
+        <li>
+            <div class="report-item">
+                <div>
+                    <h3>Full Stock Report (.csv)</h3>
+                    <p>A complete list of all medications currently in the inventory, including all details.</p>
+                </div>
+                <a href="{{ url_for('full_stock_csv') }}" class="btn btn-primary">Download</a>
+            </div>
+        </li>
+    </ul>
+</div>
+{% endblock %}

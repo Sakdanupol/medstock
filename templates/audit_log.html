@@ -1,0 +1,67 @@
+<!-- pharmacy_stock_system/templates/audit_log.html -->
+<!-- This is a new file -->
+{% extends "layout.html" %}
+
+{% block title %}Audit Log{% endblock %}
+
+{% block content %}
+<header>
+    <h1>System Audit Log</h1>
+    <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to Dashboard</a>
+</header>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="flash-messages">
+        {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>User</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td data-label="Timestamp">{{ log.timestamp }}</td>
+                <td data-label="User">{{ log.username or 'System' }}</td>
+                <td data-label="Action">{{ log.action }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="3" class="no-data">No audit records found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination Controls -->
+{% if total_pages > 1 %}
+<nav class="pagination">
+    <ul>
+        <li class="page-item {% if current_page <= 1 %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('audit_log', page=current_page - 1) }}">&laquo;</a>
+        </li>
+        {% for p in range(1, total_pages + 1) %}
+        <li class="page-item {% if p == current_page %}active{% endif %}">
+            <a class="page-link" href="{{ url_for('audit_log', page=p) }}">{{ p }}</a>
+        </li>
+        {% endfor %}
+        <li class="page-item {% if current_page >= total_pages %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('audit_log', page=current_page + 1) }}">&raquo;</a>
+        </li>
+    </ul>
+</nav>
+{% endif %}
+
+{% endblock %}

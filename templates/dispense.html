@@ -1,0 +1,117 @@
+<!-- pharmacy_stock_system/templates/dispense.html -->
+{% extends "layout.html" %}
+
+{% block title %}Dispense Prescription{% endblock %}
+
+{% block content %}
+<header>
+    <h1>Dispense Prescription</h1>
+    <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to Inventory</a>
+</header>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="flash-messages">
+        {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<form method="post" id="dispense-form">
+    <div class="dispense-grid">
+        <div class="card">
+            <h3>Add Medication to Prescription</h3>
+            <div class="form-group">
+                <label for="medication-select">Medication</label>
+                <select id="medication-select">
+                    <option value="" disabled selected>-- Select a medication --</option>
+                    {% for med in medications %}
+                        <option value="{{ med.id }}" data-name="{{ med.name }}" data-stock="{{ med.quantity }}">
+                            {{ med.name }} (In Stock: {{ med.quantity }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="quantity-input">Quantity</label>
+                <input type="number" id="quantity-input" min="1">
+            </div>
+            <button type="button" class="btn btn-primary" id="add-med-btn">Add to Prescription</button>
+        </div>
+
+        <div class="card">
+            <h3>Current Prescription</h3>
+            <div id="prescription-list">
+                <p class="no-data">No items added yet.</p>
+            </div>
+            <div class="form-group">
+                <label for="prescription_note">Note (e.g., Patient Name or Rx Number)</label>
+                <input type="text" name="prescription_note" id="prescription_note" placeholder="Optional note for this transaction">
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success" id="process-btn" disabled>Process Prescription</button>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const medSelect = document.getElementById('medication-select');
+    const quantityInput = document.getElementById('quantity-input');
+    const addBtn = document.getElementById('add-med-btn');
+    const prescriptionList = document.getElementById('prescription-list');
+    const processBtn = document.getElementById('process-btn');
+    const noDataP = prescriptionList.querySelector('.no-data');
+    let addedMedIds = new Set();
+
+    addBtn.addEventListener('click', function() {
+        const selectedOption = medSelect.options[medSelect.selectedIndex];
+        const medId = selectedOption.value;
+        const medName = selectedOption.getAttribute('data-name');
+        const maxStock = parseInt(selectedOption.getAttribute('data-stock'), 10);
+        const quantity = parseInt(quantityInput.value, 10);
+
+        if (!medId) { alert('Please select a medication.'); return; }
+        if (addedMedIds.has(medId)) { alert('This medication is already in the prescription.'); return; }
+        if (!quantity || quantity <= 0) { alert('Please enter a valid quantity > 0.'); return; }
+        if (quantity > maxStock) { alert(`Cannot add ${quantity} units. Only ${maxStock} are in stock.`); return; }
+
+        if (noDataP) noDataP.style.display = 'none';
+
+        const listItem = document.createElement('div');
+        listItem.classList.add('prescription-item');
+        listItem.setAttribute('data-id', medId);
+        listItem.innerHTML = `
+            <span><strong>${medName}</strong> - Quantity: ${quantity}</span>
+            <button type="button" class="btn-remove-item">&times;</button>
+            <input type="hidden" name="med_id" value="${medId}">
+            <input type="hidden" name="quantity" value="${quantity}">
+        `;
+        prescriptionList.appendChild(listItem);
+
+        addedMedIds.add(medId);
+        processBtn.disabled = false;
+        medSelect.selectedIndex = 0;
+        quantityInput.value = '';
+    });
+
+    prescriptionList.addEventListener('click', function(e) {
+        if (e.target.classList.contains('btn-remove-item')) {
+            const itemToRemove = e.target.parentElement;
+            const medIdToRemove = itemToRemove.getAttribute('data-id');
+            addedMedIds.delete(medIdToRemove);
+            itemToRemove.remove();
+            if (prescriptionList.querySelectorAll('.prescription-item').length === 0) {
+                 if (noDataP) noDataP.style.display = 'block';
+                 processBtn.disabled = true;
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

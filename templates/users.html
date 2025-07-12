@@ -1,0 +1,91 @@
+<!-- pharmacy_stock_system/templates/users.html -->
+{% extends "layout.html" %}
+
+{% block title %}User Management{% endblock %}
+
+{% block content %}
+<header>
+    <h1>User Management</h1>
+    <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to Inventory</a>
+</header>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="flash-messages">
+        {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<div class="card" style="margin-bottom: 2rem;">
+    <h2>Add New User</h2>
+    <form action="{{ url_for('add_user') }}" method="post">
+        <div class="add-user-grid">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" name="username" id="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password" required>
+            </div>
+            <div class="form-group">
+                <label for="role">Role</label>
+                <select name="role" id="role" required>
+                    <option value="pharmacist" selected>Pharmacist</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Create User</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="table-container">
+    <h2>Existing Users</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Current Role</th>
+                <th>Change Role</th>
+                <th>Delete User</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td data-label="Username"><strong>{{ user.username }}</strong></td>
+                <td data-label="Current Role">{{ user.role | capitalize }}</td>
+                <td data-label="Change Role">
+                    {% if user.id != session.user_id %}
+                    <form action="{{ url_for('change_role', user_id=user.id) }}" method="post" class="actions">
+                        <select name="role">
+                            <option value="pharmacist" {% if user.role == 'pharmacist' %}selected{% endif %}>Pharmacist</option>
+                            <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </form>
+                    {% else %}
+                    <span class="text-muted">N/A (Current User)</span>
+                    {% endif %}
+                </td>
+                <td data-label="Delete User">
+                    {% if user.id != session.user_id %}
+                    <form action="{{ url_for('delete_user', user_id=user.id) }}" method="post" onsubmit="return confirm('Are you sure you want to delete this user? This is irreversible.');">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                    {% else %}
+                    <span class="text-muted">N/A (Current User)</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
